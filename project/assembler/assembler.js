@@ -1,6 +1,6 @@
 var fs = require("fs"); //載入node.js的檔案系統模組
 var c = console; //console變成c
-var file = process.argv[2]; //node js/ash.js Add 的 add
+var file = process.argv[2]; //node js/assembler.js Add 的 add
 var dtable = { //建dest表
     ""   :0b000,
     "M"  :0b001,
@@ -100,7 +100,7 @@ function parse(line, i){
     }else if (line.match(/^\(([^\)]+)\)$/)){
         return{type:"S",symbol:RegExp.$1}
     }else if(line.match(/^((([AMD]*)=)?([AMD01\+\-\&\|\!]*))(;(\w*))?$/)){
-        return{type:"C",c:RegExp.$4,d:RegExp.$3,j:RegExp.$6}
+        return{type:"C",c:RegExp.$4,d:RegExp.$3,j:RegExp.$6}//c取第４個,d第３個和j第６個
     }else{
         throw "Error: line "+(i+1);
     }
@@ -111,15 +111,15 @@ function pass1(lines){//pass1
     var address =0;
     for(var i=0;i<lines.length;i++){
         var p =parse(lines[i],i);
-        if(p===null) continue;
+        if(p===null) continue;//如果p=無 繼續下一個
         if(p.type === "s"){
             c.log("symbol: %s %s",p.symbol, intToStr(address, 4, 10));
             symTable[p.symbol]=address;
             continue;
         }else{
-            c.log("p: %j", p);
+            c.log("p: %j", p);//打印p:p->json
         }
-        c.log("%s:%s %s", intToStr(i+1, 3 ,10),intToStr(address, 4 ,10), lines[i]);
+        c.log("%s:%s %s", intToStr(i+1, 3 ,10),intToStr(address, 4 ,10), lines[i]);//打印intToStr(i+1, 3 ,10)：intToStr(address, 4 ,10) lines[i])
         address++;
     }
 }
@@ -127,13 +127,13 @@ function pass1(lines){//pass1
 function pass2(lines, objFile){//pass2
     c.log("========pass2=======");
     var ws =fs.createWriteStream(objFile);
-    ws.once('open',function(fd){
+    ws.once('open',function(fd){//打開ㄋ
         var address =0;
         for(var i=0;i<lines.length;i++){
             var p =parse(lines[i],i);
             if(p===null || p.type ==="S")continue;
             var code =toCode(p);
-            c.log("%s: %s %s", intToStr(i+1, 3, 10),intToStr(code, 16, 2), lines[i] );
+            c.log("%s: %s %s", intToStr(i+1, 3, 10),intToStr(code, 16, 2), lines[i] );//打印intToStr(i+1, 3, 10)：intToStr(code, 16, 2) lines[i]
             ws.write(intToStr(code, 16, 2)+"\n");
             address++;
         }
